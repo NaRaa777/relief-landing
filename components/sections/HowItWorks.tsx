@@ -24,7 +24,20 @@ export function HowItWorks() {
       aria-labelledby="how-title"
       className="below-fold relative overflow-hidden bg-cream-deep px-5 py-16 sm:px-8 sm:py-28 lg:py-32"
     >
-      <div className="mx-auto max-w-7xl">
+      {/* Sculpted shapes beside the heading (desktop), like the other sections. */}
+      <div aria-hidden="true" className="pointer-events-none absolute top-16 right-[6%] hidden h-64 w-[34%] lg:block">
+        <div data-parallax="y" data-speed="0.12" className="absolute top-0 right-[18%] aspect-square w-44">
+          <div className="shape shape-blush animate-float-slow inset-0" />
+        </div>
+        <div data-parallax="y" data-speed="0.22" className="absolute top-36 right-0 h-12 w-36">
+          <div className="shape shape-pearl animate-float inset-0 [--r:-18deg] [animation-delay:-3s]" />
+        </div>
+        <div data-parallax="y" data-speed="0.08" className="absolute top-24 left-[6%] aspect-square w-20">
+          <div className="shape shape-plum animate-float-slow inset-0 [animation-delay:-6s]" />
+        </div>
+      </div>
+
+      <div className="relative mx-auto max-w-7xl">
         <p data-reveal className="text-xs font-semibold tracking-[0.2em] text-rose-ink uppercase">
           02 — How it will work
         </p>
@@ -42,13 +55,13 @@ export function HowItWorks() {
           </span>
         </h2>
 
-        <ol className="mt-10 grid gap-4 sm:mt-14 md:grid-cols-3 md:gap-6">
+        <ol className="mt-10 grid gap-4 sm:mt-14 lg:grid-cols-3 lg:gap-6">
           {steps.map((step, i) => (
             <li
               key={step.title}
               data-reveal
               style={{ "--d": `${i * 120}ms` } as CSSProperties}
-              className="flex gap-4 rounded-3xl bg-cream p-5 ring-1 ring-blush-deep/70 sm:p-7 md:flex-col"
+              className="flex gap-4 rounded-3xl bg-cream p-5 ring-1 ring-blush-deep/70 sm:items-center sm:gap-6 sm:p-7 lg:flex-col lg:items-start lg:gap-4"
             >
               <span
                 aria-hidden="true"

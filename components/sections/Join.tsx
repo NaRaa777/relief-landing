@@ -43,8 +43,10 @@ export function Join() {
       aria-labelledby="join-title"
       className="relative scroll-mt-4 overflow-hidden bg-[linear-gradient(180deg,var(--color-cream)_0%,var(--color-blush)_100%)] px-5 py-16 sm:px-8 sm:py-28 lg:py-36"
     >
-      <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-12">
-        <div className="relative z-10 lg:col-span-7">
+      {/* Two columns from tablet up, so the phone fills the right side
+          instead of leaving it empty. */}
+      <div className="mx-auto grid max-w-7xl items-center gap-16 md:grid-cols-12 md:gap-8 lg:gap-16">
+        <div className="relative z-10 md:col-span-7">
           <FounderNote />
 
           <h2
@@ -83,14 +85,14 @@ export function Join() {
           </ul>
         </div>
 
-        <div aria-hidden="true" className="relative hidden h-[680px] lg:col-span-5 lg:block">
+        <div aria-hidden="true" className="relative hidden h-[560px] md:col-span-5 md:block lg:h-[680px]">
           <div data-parallax="y" data-speed="0.1" className="absolute top-[4%] right-[-10%] aspect-square w-[80%]">
             <div className="shape shape-rose animate-drift inset-0" />
           </div>
           <div data-parallax="y" data-speed="0.22" className="absolute bottom-[8%] left-0 aspect-square w-[30%]">
             <div className="shape shape-blush animate-float-slow inset-0" />
           </div>
-          <div className="absolute top-[6%] left-1/2 w-[58%] max-w-[290px] -translate-x-1/2">
+          <div className="absolute top-[6%] left-1/2 w-[78%] max-w-[290px] -translate-x-1/2 lg:w-[58%]">
             <div data-reveal="scale">
               <div className="animate-float [--r:6deg]">
                 <ComfortRoutineScreen />
