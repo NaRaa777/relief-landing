@@ -22,13 +22,18 @@ export default function PrivacyPage() {
 
   return (
     <>
-      <header className="mx-auto w-full max-w-3xl px-5 pt-6 sm:px-8">
-        <Link href="/" className="inline-block rounded-md text-burgundy" aria-label="Relief home">
-          <Wordmark />
-        </Link>
+      {/* Plum header band: matches the plum page canvas behind the iOS status
+          bar, like the top of every other page. */}
+      <header className="bg-plum text-cream">
+        <div className="mx-auto w-full max-w-3xl px-5 pt-[calc(1rem+env(safe-area-inset-top))] pb-4 sm:px-8">
+          <Link href="/" className="inline-flex min-h-11 items-center rounded-md" aria-label="Relief home">
+            <Wordmark />
+          </Link>
+        </div>
       </header>
 
-      <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-5 py-16 sm:px-8">
+      <main id="main" className="w-full flex-1 bg-cream">
+        <div className="mx-auto w-full max-w-3xl px-5 py-16 sm:px-8">
         <h1 className="font-serif text-4xl tracking-tight text-ink sm:text-5xl">Privacy</h1>
         <p className="mt-4 text-ink-soft">
           Relief is a period-care app that is still in development. This page
@@ -134,6 +139,7 @@ export default function PrivacyPage() {
         >
           Back to Relief
         </Link>
+        </div>
       </main>
 
       <SiteFooter />

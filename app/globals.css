@@ -114,12 +114,17 @@
   }
 }
 
+/* The page canvas is dark plum on every page: iOS Safari and in-app browsers
+   tint the status bar, toolbar and overscroll/bounce areas with it, and every
+   page starts (header) and ends (footer) on plum. Light sections set their
+   own cream / blush backgrounds. */
 html {
   -webkit-tap-highlight-color: transparent;
+  background-color: var(--color-plum);
 }
 
 body {
-  background: var(--color-cream);
+  background-color: var(--color-plum);
   color: var(--color-ink);
   font-family: var(--font-sans);
 }

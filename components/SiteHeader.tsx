@@ -12,7 +12,7 @@ export function SiteHeader() {
       >
         Skip to content
       </a>
-      <div className="mx-auto flex max-w-7xl items-center px-5 pt-4 sm:px-8 sm:pt-7">
+      <div className="mx-auto flex max-w-7xl items-center px-5 pt-[calc(1rem+env(safe-area-inset-top))] sm:px-8 sm:pt-[calc(1.75rem+env(safe-area-inset-top))]">
         <Link href="/" className="inline-flex min-h-11 items-center rounded-md" aria-label="Relief home">
           <Wordmark />
         </Link>

@@ -14,7 +14,7 @@ export function MessageShell({ children, art }: { children: ReactNode; art?: Rea
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-plum-deep/70 to-transparent" />
       </div>
 
-      <header className="relative mx-auto w-full max-w-md px-5 pt-3 sm:pt-8 lg:max-w-6xl lg:px-8">
+      <header className="relative mx-auto w-full max-w-md px-5 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-[calc(2rem+env(safe-area-inset-top))] lg:max-w-6xl lg:px-8">
         <Link href="/" className="inline-flex min-h-11 items-center rounded-md" aria-label="Relief home">
           <Wordmark />
         </Link>

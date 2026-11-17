@@ -47,9 +47,21 @@ export function ConceptCarousel({ items }: { items: CarouselItem[] }) {
       <ul
         ref={trackRef}
         aria-label="Early concept designs"
-        // Mobile: each slide is 74% wide and centred, so the next phone peeks
-        // in from the side and shows there is more to swipe.
-        className="relative mt-10 flex snap-x snap-mandatory overflow-x-auto px-[13%] [scrollbar-width:none] sm:px-[20%] lg:mx-auto lg:mt-16 lg:block lg:aspect-[1/0.64] lg:max-w-7xl lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden"
+        // Below lg:
+        // - --pw: phone width, sized from the screen height so one whole
+        //   phone + caption + dots fit on one screen (cap 250px).
+        // - --gap: space between phones, chosen so ~18% of the next phone
+        //   peeks in on the right as a swipe hint.
+        // - pt-8 / pb-12 keep the floating phones and their shadows from
+        //   being clipped by the scroll container; mt / -mb compensate so the
+        //   section spacing is unchanged. Transparent background on purpose.
+        style={
+          {
+            "--pw": "min(250px, calc((100svh - 220px) * 0.4639))",
+            "--gap": "max(16px, calc(50vw - var(--pw) * 0.68))",
+          } as CSSProperties
+        }
+        className="relative mt-2 -mb-12 flex snap-x snap-mandatory overflow-x-auto bg-transparent px-[calc((100%-var(--pw)-var(--gap))/2)] pt-8 pb-12 [scrollbar-width:none] lg:mx-auto lg:mt-16 lg:mb-0 lg:block lg:aspect-[1/0.64] lg:max-w-7xl lg:overflow-visible lg:px-0 lg:pt-0 lg:pb-0 [&::-webkit-scrollbar]:hidden"
       >
         {items.map((item, i) => (
           <li
@@ -57,7 +69,7 @@ export function ConceptCarousel({ items }: { items: CarouselItem[] }) {
             data-index={i}
             style={item.style}
             aria-label={`${i + 1} of ${items.length}: ${item.label}`}
-            className="flex w-[74%] shrink-0 snap-center justify-center px-2.5 sm:w-[60%] lg:absolute lg:top-[var(--y)] lg:left-[var(--x)] lg:block lg:w-[var(--w)] lg:px-0"
+            className="flex w-[calc(var(--pw)+var(--gap))] shrink-0 snap-center justify-center px-[calc(var(--gap)/2)] lg:absolute lg:top-[var(--y)] lg:left-[var(--x)] lg:block lg:w-[var(--w)] lg:px-0"
           >
             {item.content}
           </li>

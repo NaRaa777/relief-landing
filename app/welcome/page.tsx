@@ -19,7 +19,7 @@ export default function WelcomePage() {
         <div className="shape shape-rose animate-drift top-[-78px] right-[-58px] size-[136px] sm:top-[-80px] sm:right-[-40px] sm:size-[260px] lg:hidden" />
       </div>
 
-      <header className="relative mx-auto w-full max-w-md px-5 pt-3 sm:pt-8 lg:max-w-6xl lg:px-8">
+      <header className="relative mx-auto w-full max-w-md px-5 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-[calc(2rem+env(safe-area-inset-top))] lg:max-w-6xl lg:px-8">
         <Wordmark />
       </header>
 

@@ -3,7 +3,7 @@ import { site } from "@/lib/site";
 
 export function SiteFooter() {
   return (
-    <footer className="relative overflow-hidden bg-plum-deep px-5 pt-12 pb-24 text-cream sm:px-8 md:pb-0">
+    <footer className="relative overflow-hidden bg-plum-deep px-5 pt-12 pb-[calc(max(32px,env(safe-area-inset-bottom))+16px)] text-cream sm:px-8 md:pb-0">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <p className="max-w-md text-[15px] leading-relaxed text-cream/85">
@@ -12,9 +12,10 @@ export function SiteFooter() {
             severe, talk to a doctor.
           </p>
           <nav aria-label="Footer">
-            <ul className="flex gap-2 text-base">
+            {/* No side padding: "Privacy" lines up with the disclaimer's left edge. */}
+            <ul className="flex gap-6 text-base">
               <li>
-                <Link href="/privacy" className="inline-flex min-h-11 items-center px-2 underline-offset-4 hover:underline">
+                <Link href="/privacy" className="inline-flex min-h-11 items-center underline-offset-4 hover:underline">
                   Privacy
                 </Link>
               </li>
@@ -22,7 +23,7 @@ export function SiteFooter() {
                 <li>
                   <a
                     href={`mailto:${site.contactEmail}`}
-                    className="inline-flex min-h-11 items-center px-2 underline-offset-4 hover:underline"
+                    className="inline-flex min-h-11 items-center underline-offset-4 hover:underline"
                   >
                     Contact
                   </a>

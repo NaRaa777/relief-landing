@@ -11,7 +11,7 @@ export function Statement() {
   return (
     <section
       aria-labelledby="statement-title"
-      className="below-fold relative overflow-hidden py-16 sm:py-28 lg:py-36"
+      className="below-fold relative overflow-hidden bg-cream py-16 sm:py-28 lg:py-36"
     >
       <div className="mx-auto max-w-7xl">
         <p data-reveal className="px-5 text-xs font-semibold tracking-[0.2em] text-rose-ink uppercase sm:px-8">

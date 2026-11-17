@@ -46,8 +46,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  // Same plum as html/body (globals.css): no light bars in iOS Safari.
   themeColor: "#2c0f1c",
   colorScheme: "light",
+  // Content may extend under the notch / home indicator; headers and footers
+  // pad themselves with env(safe-area-inset-*).
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
