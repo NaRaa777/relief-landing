@@ -4,6 +4,38 @@ import { ComfortRoutineScreen } from "@/components/mockups/Screens";
 
 const perks = ["Free to join", "First invites to early access", "Only emails about Relief"];
 
+// The founder's own story (first name is a pen name). Keep it true and short.
+function FounderNote() {
+  return (
+    <figure data-reveal className="mb-12 max-w-md sm:mb-16">
+      <blockquote className="font-serif text-[1.2rem] leading-relaxed text-ink sm:text-[1.35rem]">
+        <p>
+          I&rsquo;m Maya, 23, and painful periods have been part of my life for
+          years. The hard days always seem to catch me off guard, right when I
+          have plans. So I&rsquo;m building Relief to see them coming and feel
+          ready.
+        </p>
+        <p className="mt-4">
+          If your month looks a lot like mine, save your spot below. I&rsquo;d
+          love to have you along for the ride. 💌
+        </p>
+      </blockquote>
+      <figcaption className="mt-5 flex items-center gap-3 text-base text-ink-soft">
+        <span
+          aria-hidden="true"
+          className="grid size-10 place-items-center rounded-full bg-burgundy font-serif text-lg text-cream"
+        >
+          M
+        </span>
+        <span>
+          <span className="block font-medium text-ink">Maya</span>
+          Founder of Relief
+        </span>
+      </figcaption>
+    </figure>
+  );
+}
+
 export function Join() {
   return (
     <section
@@ -13,6 +45,8 @@ export function Join() {
     >
       <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-12">
         <div className="relative z-10 lg:col-span-7">
+          <FounderNote />
+
           <h2
             id="join-title"
             className="display text-[3.4rem] text-ink sm:text-[11vw] lg:text-[8vw] 2xl:text-[8.25rem]"
