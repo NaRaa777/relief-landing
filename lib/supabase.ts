@@ -19,7 +19,12 @@ export function notConfiguredMessage(missing: string[]) {
 
 export type InsertResult = "inserted" | "duplicate";
 
-export type Table = "waitlist" | "waitlist_survey" | "events";
+export type Table =
+  | "waitlist"
+  | "waitlist_survey"
+  | "waitlist_confirmations"
+  | "waitlist_unsubscribes"
+  | "events";
 
 export async function insertRow(
   table: Table,

@@ -38,7 +38,7 @@ export function Hero() {
 
           <p className="animate-rise mt-4 max-w-md text-base leading-[1.5] text-cream/90 [animation-delay:250ms] sm:mt-7 sm:text-lg">
             Relief helps you see your crampy, low-energy days coming &mdash; and plan
-            the comfort that actually helps, before they hit.
+            the comfort you rely on, before they hit.
           </p>
 
           <div id="hero-form" className="animate-rise mt-5 max-w-md [animation-delay:320ms] sm:mt-8">

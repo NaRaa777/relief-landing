@@ -12,6 +12,7 @@ export type WaitlistErrorCode =
   | "invalid_email"
   | "invalid_request"
   | "not_configured"
+  | "rate_limited"
   | "server_error";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;

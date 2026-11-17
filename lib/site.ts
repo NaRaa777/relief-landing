@@ -10,7 +10,7 @@ export const site = {
   name: "Relief",
   title: "Relief — Be ready for the hard days",
   description:
-    "For women with painful periods. Relief helps you see your crampy, low-energy days coming and plan the comfort that actually helps, before they hit. Join the early-access waitlist.",
+    "For women with painful periods. Relief helps you see your crampy, low-energy days coming and plan the comfort you rely on, before they hit. Join the early-access waitlist.",
   shareDescription:
     "See your crampy, low-energy days coming and plan the comfort that helps. Join the Relief early-access waitlist.",
   url: resolveSiteUrl(),

@@ -37,7 +37,9 @@ export function ConceptCarousel({ items }: { items: CarouselItem[] }) {
     const el = track?.querySelector<HTMLElement>(`[data-index="${i}"]`);
     if (!track || !el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    track.scrollTo({ left: el.offsetLeft, behavior: reduce ? "auto" : "smooth" });
+    // Centre the slide (the track has side padding so neighbours peek in).
+    const left = el.offsetLeft - (track.clientWidth - el.offsetWidth) / 2;
+    track.scrollTo({ left, behavior: reduce ? "auto" : "smooth" });
   }
 
   return (
@@ -45,7 +47,9 @@ export function ConceptCarousel({ items }: { items: CarouselItem[] }) {
       <ul
         ref={trackRef}
         aria-label="Early concept designs"
-        className="relative mt-10 flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] lg:mx-auto lg:mt-16 lg:block lg:aspect-[1/0.64] lg:max-w-7xl lg:overflow-visible [&::-webkit-scrollbar]:hidden"
+        // Mobile: each slide is 74% wide and centred, so the next phone peeks
+        // in from the side and shows there is more to swipe.
+        className="relative mt-10 flex snap-x snap-mandatory overflow-x-auto px-[13%] [scrollbar-width:none] sm:px-[20%] lg:mx-auto lg:mt-16 lg:block lg:aspect-[1/0.64] lg:max-w-7xl lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden"
       >
         {items.map((item, i) => (
           <li
@@ -53,7 +57,7 @@ export function ConceptCarousel({ items }: { items: CarouselItem[] }) {
             data-index={i}
             style={item.style}
             aria-label={`${i + 1} of ${items.length}: ${item.label}`}
-            className="flex w-full shrink-0 snap-center justify-center px-14 sm:px-28 lg:absolute lg:top-[var(--y)] lg:left-[var(--x)] lg:block lg:w-[var(--w)] lg:px-0"
+            className="flex w-[74%] shrink-0 snap-center justify-center px-2.5 sm:w-[60%] lg:absolute lg:top-[var(--y)] lg:left-[var(--x)] lg:block lg:w-[var(--w)] lg:px-0"
           >
             {item.content}
           </li>

@@ -4,11 +4,12 @@
 -- The public (anon) key can only INSERT. It cannot read, update or delete
 -- rows; read your data in the Supabase dashboard (Table Editor).
 --
--- Columns match the inserts in:
---   app/api/waitlist/route.ts  -> waitlist
---   app/api/survey/route.ts    -> waitlist_survey
---   app/api/events/route.ts    -> events
--- (all via insertRow() in lib/supabase.ts; field names from lib/waitlist.ts)
+-- Columns match the inserts in (all via insertRow() in lib/supabase.ts):
+--   app/api/waitlist/route.ts     -> waitlist
+--   app/api/survey/route.ts       -> waitlist_survey
+--   app/api/confirm/route.ts      -> waitlist_confirmations
+--   app/api/unsubscribe/route.ts  -> waitlist_unsubscribes
+--   app/api/events/route.ts       -> events
 
 -- 1. Tables ---------------------------------------------------------------
 
@@ -22,6 +23,20 @@ create table if not exists public.waitlist_survey (
   id          bigint generated always as identity primary key,
   email       text not null,
   created_at  timestamptz not null default now()
+);
+
+-- One row per confirmed email (double opt-in link in the confirmation email).
+create table if not exists public.waitlist_confirmations (
+  id            bigint generated always as identity primary key,
+  email         text not null,
+  confirmed_at  timestamptz not null default now()
+);
+
+-- One row per unsubscribed email. Never email these addresses again.
+create table if not exists public.waitlist_unsubscribes (
+  id                bigint generated always as identity primary key,
+  email             text not null,
+  unsubscribed_at   timestamptz not null default now()
 );
 
 create table if not exists public.events (
@@ -45,15 +60,19 @@ alter table public.waitlist
   add column if not exists landing_path text,
   add column if not exists created_at   timestamptz not null default now();
 
--- waitlist_survey: { email, pain_level, current_methods, would_pay, completed }
+-- waitlist_survey: { email, pain_level, current_methods, would_pay,
+--                    completed, consent_version }
 -- email comes from the encrypted signup cookie, never from the browser.
--- completed = false marks a partial save (visitor left /welcome mid-way).
+-- Answers are saved only when the visitor finishes (completed = true);
+-- older partial saves have completed = false.
+-- consent_version = the wording of the consent notice the visitor saw.
 alter table public.waitlist_survey
   add column if not exists email           text,
   add column if not exists pain_level      text,
   add column if not exists current_methods text[] not null default '{}',
   add column if not exists would_pay       text,
   add column if not exists completed       boolean not null default false,
+  add column if not exists consent_version text,
   add column if not exists created_at      timestamptz not null default now();
 
 -- events: { name, session_id, path, props, utm_*, referrer, landing_path }
@@ -76,7 +95,8 @@ alter table public.events
 do $$
 begin
   -- Unique email on the waitlist. The API relies on the 23505 error from
-  -- this constraint to answer "already joined".
+  -- this constraint to answer "already joined", and the other tables link
+  -- to it.
   if not exists (
     select 1 from pg_constraint
     where conrelid = 'public.waitlist'::regclass and conname = 'waitlist_email_unique'
@@ -89,6 +109,15 @@ begin
     alter table public.waitlist add constraint waitlist_email_unique unique (email);
   end if;
 
+  -- One confirmation / unsubscribe row per email: a second click is a
+  -- harmless duplicate that the API ignores.
+  if not exists (select 1 from pg_constraint where conname = 'waitlist_confirmations_email_unique') then
+    alter table public.waitlist_confirmations add constraint waitlist_confirmations_email_unique unique (email);
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'waitlist_unsubscribes_email_unique') then
+    alter table public.waitlist_unsubscribes add constraint waitlist_unsubscribes_email_unique unique (email);
+  end if;
+
   -- NOT NULL where the code always sends a value (skipped if old rows have nulls).
   if not exists (select 1 from public.waitlist where email is null) then
     alter table public.waitlist alter column email set not null;
@@ -98,6 +127,22 @@ begin
   end if;
   if not exists (select 1 from public.events where name is null) then
     alter table public.events alter column name set not null;
+  end if;
+
+  -- Links to the signup: every survey answer, confirmation and unsubscribe
+  -- belongs to a waitlist email. Deleting a signup deletes them too (for
+  -- "delete my data" requests). NOT VALID: older rows are not checked.
+  if not exists (select 1 from pg_constraint where conname = 'waitlist_survey_email_fkey') then
+    alter table public.waitlist_survey add constraint waitlist_survey_email_fkey
+      foreign key (email) references public.waitlist (email) on delete cascade not valid;
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'waitlist_confirmations_email_fkey') then
+    alter table public.waitlist_confirmations add constraint waitlist_confirmations_email_fkey
+      foreign key (email) references public.waitlist (email) on delete cascade not valid;
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'waitlist_unsubscribes_email_fkey') then
+    alter table public.waitlist_unsubscribes add constraint waitlist_unsubscribes_email_fkey
+      foreign key (email) references public.waitlist (email) on delete cascade not valid;
   end if;
 
   -- Allowed values, matching lib/waitlist.ts. NOT VALID = checked on new
@@ -118,35 +163,40 @@ begin
     alter table public.waitlist_survey add constraint waitlist_survey_would_pay_check
       check (would_pay in ('yes', 'maybe', 'no')) not valid;
   end if;
+  if not exists (select 1 from pg_constraint where conname = 'waitlist_survey_current_methods_check') then
+    alter table public.waitlist_survey add constraint waitlist_survey_current_methods_check
+      check (current_methods <@ array['painkillers', 'heating_pad', 'tracker_app',
+                                      'rest_cancel_plans', 'nothing', 'other']::text[]) not valid;
+  end if;
 end $$;
 
--- Event names, matching EVENT_NAMES in lib/waitlist.ts. Dropped and re-added
--- every run so the list stays current when new events are added.
+-- Event names: the API only accepts names listed in EVENT_NAMES
+-- (lib/waitlist.ts). The database just checks the format, so adding an event
+-- in the code no longer needs a SQL change.
 alter table public.events drop constraint if exists events_name_check;
 alter table public.events add constraint events_name_check
-  check (name in (
-    'page_view', 'form_focus', 'signup_submitted',
-    'welcome_viewed', 'survey_step_completed', 'survey_skipped',
-    'survey_completed', 'share_clicked'
-  )) not valid;
+  check (name ~ '^[a-z_]{1,40}$') not valid;
 
 create index if not exists waitlist_survey_email_idx on public.waitlist_survey (email);
 create index if not exists events_name_created_idx on public.events (name, created_at);
 
 -- 4. Row Level Security: insert-only for anon -------------------------------
 
-alter table public.waitlist        enable row level security;
-alter table public.waitlist_survey enable row level security;
-alter table public.events          enable row level security;
+alter table public.waitlist               enable row level security;
+alter table public.waitlist_survey        enable row level security;
+alter table public.waitlist_confirmations enable row level security;
+alter table public.waitlist_unsubscribes  enable row level security;
+alter table public.events                 enable row level security;
 
 -- Remove every existing policy on these tables, so no older select, update
--- or delete policy survives. Only the three insert policies below remain.
+-- or delete policy survives. Only the insert policies below remain.
 do $$
 declare p record;
 begin
   for p in
     select policyname, tablename from pg_policies
-    where schemaname = 'public' and tablename in ('waitlist', 'waitlist_survey', 'events')
+    where schemaname = 'public'
+      and tablename in ('waitlist', 'waitlist_survey', 'waitlist_confirmations', 'waitlist_unsubscribes', 'events')
   loop
     execute format('drop policy %I on public.%I', p.policyname, p.tablename);
   end loop;
@@ -158,20 +208,36 @@ create policy "anon can insert into waitlist"
 create policy "anon can insert into waitlist_survey"
   on public.waitlist_survey for insert to anon with check (true);
 
+create policy "anon can insert into waitlist_confirmations"
+  on public.waitlist_confirmations for insert to anon with check (true);
+
+create policy "anon can insert into waitlist_unsubscribes"
+  on public.waitlist_unsubscribes for insert to anon with check (true);
+
 create policy "anon can insert into events"
   on public.events for insert to anon with check (true);
 
 -- Table privileges to match: anon may insert, nothing else.
-revoke all on table public.waitlist, public.waitlist_survey, public.events from anon;
-grant insert on table public.waitlist, public.waitlist_survey, public.events to anon;
+revoke all on table
+  public.waitlist, public.waitlist_survey, public.waitlist_confirmations,
+  public.waitlist_unsubscribes, public.events
+from anon;
+grant insert on table
+  public.waitlist, public.waitlist_survey, public.waitlist_confirmations,
+  public.waitlist_unsubscribes, public.events
+to anon;
 
 -- 5. Views for reading results in the dashboard (not reachable by anon) ----
 
-create or replace view public.waitlist_with_survey
+-- Dropped first: Postgres can't add columns to the middle of an existing view.
+drop view if exists public.waitlist_with_survey;
+create view public.waitlist_with_survey
 with (security_invoker = true) as
 select
   w.email,
   w.created_at as signed_up_at,
+  c.confirmed_at,
+  u.unsubscribed_at,
   w.source,
   w.utm_source,
   w.utm_campaign,
@@ -179,15 +245,25 @@ select
   s.current_methods,
   s.would_pay
 from public.waitlist w
+left join public.waitlist_confirmations c on c.email = w.email
+left join public.waitlist_unsubscribes u on u.email = w.email
 left join lateral (
-  -- Prefer the finished survey over a partial save, then the latest.
+  -- Prefer a finished survey, then the latest.
   select * from public.waitlist_survey ws
   where ws.email = w.email
   order by ws.completed desc, ws.created_at desc
   limit 1
 ) s on true;
 
--- Dropped first: Postgres can't add columns to the middle of an existing view.
+-- Who you may email: confirmed and not unsubscribed.
+drop view if exists public.waitlist_mailable;
+create view public.waitlist_mailable
+with (security_invoker = true) as
+select w.email, c.confirmed_at
+from public.waitlist w
+join public.waitlist_confirmations c on c.email = w.email
+where not exists (select 1 from public.waitlist_unsubscribes u where u.email = w.email);
+
 drop view if exists public.funnel_daily;
 create view public.funnel_daily
 with (security_invoker = true) as
@@ -204,4 +280,9 @@ from public.events
 group by 1, 2
 order by 1 desc, 2;
 
-revoke all on public.waitlist_with_survey, public.funnel_daily from anon, authenticated;
+revoke all on public.waitlist_with_survey, public.waitlist_mailable, public.funnel_daily
+from anon, authenticated;
+
+-- 6. Make the API see the changes right away ---------------------------------
+
+notify pgrst, 'reload schema';

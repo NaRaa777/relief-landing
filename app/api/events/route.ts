@@ -1,3 +1,4 @@
+import { allowRequest, clientIp } from "@/lib/rate-limit";
 import { getMissingSupabaseEnv, insertRow } from "@/lib/supabase";
 import { EVENT_NAMES, sanitizeAttribution } from "@/lib/waitlist";
 
@@ -31,6 +32,8 @@ export async function POST(request: Request) {
   }
 
   if (getMissingSupabaseEnv().length > 0) return new Response(null, { status: 204 });
+  // Quietly drop floods so a script can't fill the analytics table.
+  if (!allowRequest("events", clientIp(request), 120, 60_000)) return new Response(null, { status: 204 });
 
   try {
     await insertRow("events", {

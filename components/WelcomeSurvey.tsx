@@ -44,12 +44,6 @@ export function WelcomeSurvey() {
   const advanceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const firstRender = useRef(true);
   const viewed = useRef(false);
-  // Answers as of now, for the leave-the-page handler.
-  const latest = useRef({ answers, phase, partialSent: false });
-  useEffect(() => {
-    latest.current.answers = answers;
-    latest.current.phase = phase;
-  }, [answers, phase]);
 
   useEffect(() => {
     if (viewed.current) return;
@@ -57,22 +51,8 @@ export function WelcomeSurvey() {
     track("welcome_viewed");
   }, []);
 
-  // Partial save: if the visitor leaves mid-survey, keep what they answered.
-  useEffect(() => {
-    function onHide() {
-      const s = latest.current;
-      if (document.visibilityState !== "hidden" || s.partialSent) return;
-      if (s.phase === "done" || s.phase === "saving" || !hasAnswers(s.answers)) return;
-      s.partialSent = true;
-      const body = JSON.stringify({ answers: s.answers, completed: false });
-      const blob = new Blob([body], { type: "application/json" });
-      if (!navigator.sendBeacon?.("/api/survey", blob)) {
-        void fetch("/api/survey", { method: "POST", body, keepalive: true, headers: { "Content-Type": "application/json" } });
-      }
-    }
-    document.addEventListener("visibilitychange", onHide);
-    return () => document.removeEventListener("visibilitychange", onHide);
-  }, []);
+  // Answers are health-related: they are only sent when the visitor reaches
+  // the end of the survey, never in the background if she leaves mid-way.
 
   useEffect(() => () => clearTimeout(advanceTimer.current), []);
 
@@ -96,7 +76,7 @@ export function WelcomeSurvey() {
       const res = await fetch("/api/survey", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers: final, completed: true }),
+        body: JSON.stringify({ answers: final }),
       });
       const data = (await res.json().catch(() => null)) as { ok?: boolean; code?: string; message?: string } | null;
       if (!res.ok || !data?.ok) {
@@ -182,9 +162,23 @@ export function WelcomeSurvey() {
         {/* The intro line only on the first question, so every step fits a
             375×667 screen without scrolling. */}
         {step === 0 && !done && (
-          <p className="mt-1 text-[15px] leading-snug text-cream/85">
-            Three quick questions help us build Relief for you. Takes 15 seconds.
-          </p>
+          <>
+            <p className="mt-1 text-[15px] leading-snug text-cream/85">
+              Three quick questions help us build Relief for you. Takes 15 seconds.
+            </p>
+            {/* Consent notice, shown before any answer is given. */}
+            <p className="mt-1.5 text-[13px] leading-snug text-cream/75">
+              Optional. Your answers are saved with your email only when you finish.{" "}
+              <Link
+                href="/privacy#survey"
+                target="_blank"
+                rel="noopener"
+                className="underline underline-offset-2 hover:text-cream"
+              >
+                Privacy
+              </Link>
+            </p>
+          </>
         )}
         <div className="mt-3 flex items-center gap-3">
           <div

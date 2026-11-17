@@ -6,6 +6,19 @@ type Props = Record<string, string | string[]>;
 declare global {
   interface Window {
     dataLayer?: Record<string, unknown>[];
+    ttq?: { track: (event: string, props?: Record<string, unknown>) => void };
+  }
+}
+
+/**
+ * Tells the TikTok Pixel (if it is on) that someone joined the waitlist.
+ * Deliberately sends nothing about the person: no email, no survey answer.
+ */
+export function trackPixelSignup() {
+  try {
+    window.ttq?.track("CompleteRegistration");
+  } catch {
+    // Never let an ad tag break the signup.
   }
 }
 

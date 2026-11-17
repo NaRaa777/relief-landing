@@ -33,22 +33,22 @@ export function Statement() {
             />
           </h2>
 
-          {/* Mobile: one swipeable row. Desktop: floating tags. */}
+          {/* Mobile: tags wrap so all four are readable. Desktop: floating tags. */}
           <ul
             aria-label="Sound familiar?"
-            className="mt-8 flex snap-x gap-2.5 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:px-8 lg:mt-0 lg:block lg:overflow-visible lg:p-0"
+            className="mt-7 flex flex-wrap gap-2 px-5 sm:px-8 lg:mt-0 lg:block lg:p-0"
           >
             {notes.map((note, i) => (
               <li
                 key={note.text}
                 data-parallax="y"
                 data-speed={note.speed}
-                className={`shrink-0 snap-start lg:absolute ${note.pos}`}
+                className={`lg:absolute ${note.pos}`}
               >
                 <span
                   data-reveal
                   style={{ "--d": `${200 + i * 100}ms` } as React.CSSProperties}
-                  className={`inline-flex min-h-11 items-center rounded-full border border-burgundy/30 bg-white/70 px-4 text-base whitespace-nowrap text-burgundy shadow-[0_10px_30px_-18px_rgb(107_38_51/0.6)] transition-[rotate,background-color,color] duration-500 lg:bg-cream lg:hover:rotate-0 lg:hover:bg-burgundy lg:hover:text-cream ${note.rot}`}
+                  className={`inline-flex min-h-10 items-center rounded-full border border-burgundy/30 bg-white/70 px-3.5 text-[15px] whitespace-nowrap text-burgundy sm:min-h-11 sm:px-4 sm:text-base shadow-[0_10px_30px_-18px_rgb(107_38_51/0.6)] transition-[rotate,background-color,color] duration-500 lg:bg-cream lg:hover:rotate-0 lg:hover:bg-burgundy lg:hover:text-cream ${note.rot}`}
                 >
                   {note.text}
                 </span>

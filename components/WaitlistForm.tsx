@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useId, useRef, useState, type FormEvent } from "react";
 import { ShareBlock } from "@/components/ShareBlock";
 import { getAttribution } from "@/lib/client/attribution";
-import { track } from "@/lib/client/analytics";
+import { track, trackPixelSignup } from "@/lib/client/analytics";
 import { setSignup, useSignup } from "@/lib/client/signup-store";
 import {
   isValidEmail,
@@ -80,6 +80,7 @@ export function WaitlistForm({
 
       if (res.ok && data && data.status !== "error") {
         track("signup_submitted", { source, status: data.status });
+        if (data.status === "joined") trackPixelSignup();
         // The API set an httpOnly cookie that links /welcome to this signup;
         // the email itself never goes in the URL.
         router.push("/welcome");

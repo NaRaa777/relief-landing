@@ -3,8 +3,10 @@ import { MotionProvider } from "@/components/MotionProvider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { StickyCta } from "@/components/StickyCta";
+import { TikTokPixel } from "@/components/TikTokPixel";
 import { ConceptReveal } from "@/components/sections/ConceptReveal";
 import { Hero } from "@/components/sections/Hero";
+import { HowItWorks } from "@/components/sections/HowItWorks";
 import { Join } from "@/components/sections/Join";
 import { Statement } from "@/components/sections/Statement";
 
@@ -17,11 +19,13 @@ export default function Home() {
       <main id="main" className="flex-1 overflow-x-clip">
         <Hero />
         <Statement />
+        <HowItWorks />
         <ConceptReveal />
         <Join />
       </main>
       <SiteFooter />
       <StickyCta />
+      <TikTokPixel />
     </>
   );
 }

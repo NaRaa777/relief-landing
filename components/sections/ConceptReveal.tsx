@@ -78,7 +78,7 @@ export function ConceptReveal() {
       <div className="relative mx-auto flex max-w-7xl flex-col gap-4 px-5 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p data-reveal className="text-xs font-semibold tracking-[0.2em] text-rose-ink uppercase">
-            02 — A first look at Relief
+            03 — A first look at Relief
           </p>
           <h2
             id="concept-title"

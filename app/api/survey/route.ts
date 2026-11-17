@@ -1,14 +1,25 @@
 import { cookies } from "next/headers";
+import { allowRequest, clientIp } from "@/lib/rate-limit";
 import { SIGNUP_COOKIE, readSignupToken } from "@/lib/signup-session";
 import { getMissingSupabaseEnv, insertRow, notConfiguredMessage } from "@/lib/supabase";
 import { sanitizeSurvey } from "@/lib/waitlist";
 
-// Saves /welcome survey answers. Who is answering comes from the encrypted
-// signup cookie set by /api/waitlist, never from the request body or URL.
-// Body: { answers, completed }. `completed: false` is a partial save sent
-// when the visitor leaves mid-way.
+// Saves /welcome survey answers, once, when the visitor finishes. Who is
+// answering comes from the encrypted signup cookie set by /api/waitlist,
+// never from the request body or URL. Body: { answers }.
+
+// Bump when the consent notice on /welcome or the survey section of /privacy
+// changes, so each row records which wording the visitor saw.
+const SURVEY_CONSENT_VERSION = "2026-11-survey-v1";
 
 export async function POST(request: Request) {
+  if (!allowRequest("survey", clientIp(request), 5, 10 * 60_000)) {
+    return Response.json(
+      { ok: false, message: "That’s a lot of tries. Please wait a few minutes and try again." },
+      { status: 429 },
+    );
+  }
+
   let payload: Record<string, unknown>;
   try {
     payload = (await request.json()) ?? {};
@@ -29,7 +40,6 @@ export async function POST(request: Request) {
   if (!answers.pain_level && !answers.would_pay && answers.current_methods.length === 0) {
     return Response.json({ ok: false, message: "No answers to save." }, { status: 400 });
   }
-  const completed = payload.completed === true;
 
   const missing = getMissingSupabaseEnv();
   if (missing.length > 0) {
@@ -37,9 +47,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    await insertRow("waitlist_survey", { email, ...answers, completed });
+    await insertRow("waitlist_survey", {
+      email,
+      ...answers,
+      completed: true,
+      consent_version: SURVEY_CONSENT_VERSION,
+    });
     // Done: /welcome has nothing more to do for this visitor.
-    if (completed) cookieStore.delete(SIGNUP_COOKIE);
+    cookieStore.delete(SIGNUP_COOKIE);
     return Response.json({ ok: true });
   } catch (error) {
     console.error("[survey]", error);

@@ -233,6 +233,20 @@ body {
     0 40px 80px -36px rgb(107 38 51 / 0.45);
 }
 
+/* Phones (often inside TikTok's in-app browser): keep the shapes still and
+   drop the GPU layers they reserve. The phone mockups keep a gentle float. */
+@media (max-width: 767px) {
+  .shape {
+    will-change: auto;
+  }
+
+  .shape.animate-drift,
+  .shape.animate-float-slow,
+  .shape.animate-float {
+    animation: none;
+  }
+}
+
 /* Phone mockup screens scale with the device width. */
 .phone-screen {
   container-type: inline-size;

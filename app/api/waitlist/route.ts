@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { sendConfirmationEmail } from "@/lib/email";
+import { allowRequest, clientIp } from "@/lib/rate-limit";
 import { SIGNUP_COOKIE, createSignupToken, signupCookieOptions } from "@/lib/signup-session";
 import { getMissingSupabaseEnv, insertRow, notConfiguredMessage } from "@/lib/supabase";
 import {
@@ -19,6 +21,10 @@ function fail(code: WaitlistErrorCode, message: string, status: number) {
 }
 
 export async function POST(request: Request) {
+  if (!allowRequest("waitlist", clientIp(request), 5, 60_000)) {
+    return fail("rate_limited", "That’s a lot of tries. Please wait a minute and try again.", 429);
+  }
+
   let payload: unknown;
   try {
     payload = await request.json();
@@ -61,6 +67,10 @@ export async function POST(request: Request) {
     // encrypted in an httpOnly cookie, never in the URL.
     const token = createSignupToken(normalized);
     if (token) (await cookies()).set(SIGNUP_COOKIE, token, signupCookieOptions);
+
+    // Double opt-in: new signups get one email with a confirmation link.
+    // Duplicates don't, so the form can't be used to spam an inbox.
+    if (result === "inserted") await sendConfirmationEmail(normalized, new URL(request.url).origin);
 
     return reply({ status: result === "duplicate" ? "already_joined" : "joined" });
   } catch (error) {
