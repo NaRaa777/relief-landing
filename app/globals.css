@@ -1,0 +1,303 @@
+@import "tailwindcss";
+
+@theme {
+  /* Ivory */
+  --color-cream: #f8f1e9;
+  --color-cream-deep: #efe4d8;
+  /* Blush & rose */
+  --color-blush: #f2d6d0;
+  --color-blush-deep: #e7bfb7;
+  --color-rose: #c98b8b;
+  --color-rose-ink: #8a4250; /* 5.1:1 on blush, for small eyebrow text */
+  /* Burgundy & plum */
+  --color-wine: #8e2f45;
+  --color-burgundy: #6b2633;
+  --color-burgundy-deep: #4a1822;
+  --color-plum: #2c0f1c;
+  --color-plum-deep: #1c0811;
+  /* Text */
+  --color-ink: #2a1218;
+  /* ~9:1 on ivory, ~7.5:1 on blush. */
+  --color-ink-soft: #553840;
+
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-rise: rise 1.1s var(--ease-out-soft) both;
+  --animate-line: line-up 1.2s var(--ease-out-soft) both;
+  --animate-fade: fade 1.6s ease-out both;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-float-slow: float 11s ease-in-out infinite;
+  --animate-drift: drift 26s ease-in-out infinite;
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-step-next: step-next 0.34s var(--ease-out-soft) both;
+  --animate-step-back: step-back 0.34s var(--ease-out-soft) both;
+
+  @keyframes step-next {
+    from {
+      opacity: 0;
+      transform: translateX(28px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes step-back {
+    from {
+      opacity: 0;
+      transform: translateX(-28px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes line-up {
+    from {
+      transform: translateY(108%);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(var(--r, 0deg));
+    }
+    50% {
+      transform: translateY(-14px) rotate(calc(var(--r, 0deg) + 1.2deg));
+    }
+  }
+
+  /* Translate/scale only, so the baked-in light direction stays put. */
+  @keyframes drift {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(-2.5%, 3%) scale(1.045);
+    }
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--color-blush-deep);
+  color: var(--color-burgundy-deep);
+}
+
+/* In the base layer so utilities like `outline-none` can override it. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+}
+
+/* Display type: Fraunces with its soft, slightly wonky optical style. */
+.display {
+  font-family: var(--font-serif);
+  font-weight: 340;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+
+.display em {
+  font-weight: 280;
+  letter-spacing: -0.03em;
+}
+
+.link-underline {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size 0.4s var(--ease-out-soft);
+}
+
+.link-underline:hover {
+  background-size: 100% 1px;
+}
+
+/* Film grain for art-directed surfaces. A utility so it can be desktop-only
+   (`md:grain`): blending a full-screen layer is costly on low-end phones. */
+@utility grain {
+  isolation: isolate;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0.16;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Skip rendering work for below-the-fold sections until they're near. */
+.below-fold {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+/* Sculpted 3D forms: layered gradients for a soft, clay-like volume. */
+.shape {
+  position: absolute;
+  will-change: transform;
+}
+
+.shape-rose {
+  border-radius: 58% 42% 55% 45% / 52% 44% 56% 48%;
+  background:
+    radial-gradient(circle at 30% 26%, rgb(255 255 255 / 0.85) 0, rgb(255 255 255 / 0) 18%),
+    radial-gradient(circle at 36% 34%, #fbe3de 0%, #e9b3ad 28%, #c47a80 55%, #7a2a3d 88%);
+  box-shadow:
+    inset -40px -50px 90px rgb(60 10 28 / 0.55),
+    inset 24px 24px 60px rgb(255 255 255 / 0.3),
+    0 60px 120px -40px rgb(20 4 10 / 0.7);
+}
+
+.shape-plum {
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 210 215 / 0.55) 0, rgb(255 210 215 / 0) 22%),
+    radial-gradient(circle at 40% 38%, #a8455a 0%, #6b2633 40%, #2c0f1c 85%);
+  box-shadow:
+    inset -30px -40px 70px rgb(10 2 6 / 0.7),
+    inset 10px 14px 40px rgb(255 190 200 / 0.25),
+    0 40px 90px -30px rgb(10 2 6 / 0.8);
+}
+
+.shape-pearl {
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse at 30% 25%, rgb(255 255 255 / 0.95) 0, rgb(255 255 255 / 0) 30%),
+    linear-gradient(150deg, #fff8f2 0%, #f2d6d0 45%, #d9a6a3 80%, #b8787f 100%);
+  box-shadow:
+    inset -16px -22px 40px rgb(120 50 65 / 0.35),
+    inset 10px 10px 24px rgb(255 255 255 / 0.6),
+    0 30px 60px -24px rgb(30 6 14 / 0.6);
+}
+
+.shape-blush {
+  border-radius: 46% 54% 40% 60% / 55% 45% 55% 45%;
+  background:
+    radial-gradient(circle at 34% 30%, rgb(255 255 255 / 0.9) 0, rgb(255 255 255 / 0) 22%),
+    radial-gradient(circle at 40% 40%, #fdeeea 0%, #f2d6d0 40%, #dca7a6 80%);
+  box-shadow:
+    inset -26px -34px 60px rgb(150 70 80 / 0.28),
+    inset 16px 16px 40px rgb(255 255 255 / 0.55),
+    0 40px 80px -36px rgb(107 38 51 / 0.45);
+}
+
+/* Phone mockup screens scale with the device width. */
+.phone-screen {
+  container-type: inline-size;
+}
+
+.phone-ui {
+  font-size: 4.3cqw;
+}
+
+/* ----------------------------------------------------------------------
+   Scroll motion. Hidden states apply only once MotionProvider has run, so
+   all content stays visible if JavaScript is unavailable.
+   ---------------------------------------------------------------------- */
+.motion-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(36px);
+  transition:
+    opacity 1s var(--ease-out-soft),
+    transform 1.2s var(--ease-out-soft);
+  transition-delay: var(--d, 0ms);
+}
+
+.motion-ready [data-reveal="scale"] {
+  transform: translateY(40px) scale(0.94);
+}
+
+.motion-ready [data-reveal="line"] {
+  opacity: 1;
+  transform: translateY(108%);
+}
+
+.motion-ready [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Words light up one by one as the statement scrolls into view. */
+.motion-ready [data-words] .word {
+  opacity: 0.16;
+  transition: opacity 0.6s ease;
+  transition-delay: calc(var(--i) * 45ms);
+}
+
+.motion-ready [data-words].is-in .word {
+  opacity: 1;
+}
+
+[data-parallax] {
+  translate: var(--px, 0) var(--py, 0);
+  will-change: translate;
+}
+
+.line-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
